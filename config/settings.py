@@ -47,8 +47,7 @@ INSTALLED_APPS = [
 
     "users",
     "materials",
-
-
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -136,3 +135,9 @@ AUTH_USER_MODEL = "users.User"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend"
+    ]
+}

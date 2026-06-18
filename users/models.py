@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
+from django.conf import settings
 
 
 class UserManager(BaseUserManager):
@@ -42,3 +43,48 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Payment(models.Model):
+
+    CASH = "cash"
+    TRANSFER = "transfer"
+
+    PAYMENT_METHOD_CHOICES = [
+        (CASH, "Cash"),
+        (TRANSFER, "Transfer to account"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="payments"
+    )
+
+    payment_date = models.DateTimeField(auto_now_add=True)
+
+    paid_course = models.ForeignKey(
+        "materials.Course",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payments"
+    )
+
+    paid_lesson = models.ForeignKey(
+        "materials.Lesson",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payments"
+    )
+
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    payment_method = models.CharField(
+        max_length=10,
+        choices=PAYMENT_METHOD_CHOICES
+    )
+
+    def __str__(self):
+        return f"{self.user} - {self.amount}"
