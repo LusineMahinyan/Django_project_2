@@ -20,23 +20,23 @@ from materials.views import (
 )
 
 router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'payments', PaymentViewSet)
-router.register(r'courses', CourseViewSet)
-router.register(r'lessons', LessonViewSet)
+router.register(r"users", UserViewSet)
+router.register(r"payments", PaymentViewSet)
+router.register(r"courses", CourseViewSet)
+router.register(r"lessons", LessonViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
 
     # JWT
-    path('api/token/', TokenObtainPairView.as_view()),
-    path('api/token/refresh/', TokenRefreshView.as_view()),
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
     # Регистрация
-    path('api/register/', RegisterView.as_view()),
+    path("api/register/", RegisterView.as_view(), name="register"),
 
     # API
-    path('api/', include(router.urls)),
+    path("api/", include(router.urls)),
 ]
 
 if settings.DEBUG:
