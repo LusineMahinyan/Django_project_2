@@ -78,3 +78,8 @@ class Payment(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.amount}"
 
+stripe_product_id = models.CharField(max_length=255, blank=True, null=True)
+stripe_price_id = models.CharField(max_length=255, blank=True, null=True)
+stripe_session_id = models.CharField(max_length=255, blank=True, null=True)
+payment_link = models.URLField(blank=True, null=True)
+status = models.CharField(max_length=50, default="pending")

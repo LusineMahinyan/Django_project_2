@@ -16,9 +16,6 @@ class LessonShortSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-    paid_course = CourseShortSerializer(read_only=True)
-    paid_lesson = LessonShortSerializer(read_only=True)
-
     class Meta:
         model = Payment
         fields = "__all__"
