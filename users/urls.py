@@ -1,7 +1,6 @@
-from rest_framework.routers import DefaultRouter
-from .views import PaymentViewSet
+from django.urls import path
+from .views import UserRetrieveUpdateAPIView
 
-router = DefaultRouter()
-router.register(r"payments", PaymentViewSet)
-
-urlpatterns = router.urls
+urlpatterns = [
+    path("profile/", UserRetrieveUpdateAPIView.as_view()),
+]

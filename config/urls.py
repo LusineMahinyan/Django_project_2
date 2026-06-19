@@ -6,11 +6,13 @@ from materials.views import CourseViewSet
 from users.views import PaymentViewSet
 
 router = DefaultRouter()
-router.register(r'courses', CourseViewSet)
-router.register(r'payments', PaymentViewSet)
+router.register(r"courses", CourseViewSet)
+router.register(r"payments", PaymentViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/lessons/', include('materials.urls')),
+    path("admin/", admin.site.urls),
+
+    path("api/", include(router.urls)),
+    path("api/", include("users.urls")),
+    path("api/lessons/", include("materials.urls")),
 ]
