@@ -1,15 +1,11 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 
-from users.permissions import IsModerator, IsOwner
 
-
-# -----------------------
-# COURSE
-# -----------------------
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -23,17 +19,20 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Course.objects.filter(owner=user)
 
     def get_permissions(self):
-        if self.action in ["create", "destroy"]:
-            return [IsAuthenticated(), IsOwner]
         return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def perform_destroy(self, instance):
+        if (
+            self.request.user.groups.filter(name="moderator").exists()
+            and not self.request.user.is_superuser
+        ):
+            raise PermissionDenied("Модератор не может удалять курсы.")
+        instance.delete()
 
-# -----------------------
-# LESSON
-# -----------------------
+
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
@@ -47,9 +46,15 @@ class LessonViewSet(viewsets.ModelViewSet):
         return Lesson.objects.filter(owner=user)
 
     def get_permissions(self):
-        if self.action in ["create", "destroy"]:
-            return [IsAuthenticated(), IsOwner]
         return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_destroy(self, instance):
+        if (
+            self.request.user.groups.filter(name="moderator").exists()
+            and not self.request.user.is_superuser
+        ):
+            raise PermissionDenied("Модератор не может удалять уроки.")
+        instance.delete()
