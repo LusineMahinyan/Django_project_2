@@ -1,13 +1,22 @@
 from rest_framework import generics, viewsets
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+)
 from rest_framework.response import Response
+from rest_framework.decorators import action
+import stripe
 
 from .models import User, Payment
-from .serializers import UserSerializer, PaymentSerializer, RegisterSerializer
+from .serializers import (
+    UserSerializer,
+    PaymentSerializer,
+    RegisterSerializer,
+)
 from .services.stripe_service import (
     create_product,
     create_price,
-    create_session
+    create_session,
 )
 
 
@@ -32,23 +41,36 @@ class UserViewSet(viewsets.ModelViewSet):
 # PAYMENTS
 # -------------------------
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
+    queryset = Payment.objects.all()   # <-- ВОТ ЭТО ДОБАВИТЬ
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Payment.objects.all()
+
+        return Payment.objects.filter(
+            user=self.request.user
+        )
+
     def perform_create(self, serializer):
-        payment = serializer.save(user=self.request.user)
+        payment = serializer.save(
+            user=self.request.user
+        )
 
         name = (
-            payment.paid_course.name
-            if payment.paid_course
-            else payment.paid_lesson.name
+            payment.course.name
+            if payment.course
+            else payment.lesson.name
         )
 
         amount = int(payment.amount * 100)
 
         product = create_product(name)
-        price = create_price(product.id, amount)
+        price = create_price(
+            product.id,
+            amount
+        )
         session = create_session(price.id)
 
         payment.stripe_product_id = product.id
@@ -57,8 +79,23 @@ class PaymentViewSet(viewsets.ModelViewSet):
         payment.payment_link = session.url
         payment.save()
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+    @action(
+        detail=True,
+        methods=["get"]
+    )
+    def status(self, request, pk=None):
+        payment = self.get_object()
 
-        return Response(serializer.data)
+        session = stripe.checkout.Session.retrieve(
+            payment.stripe_session_id
+        )
+
+        payment.status = session.payment_status
+        payment.save()
+
+        return Response(
+            {
+                "status": payment.status,
+                "payment_link": payment.payment_link,
+            }
+        )
