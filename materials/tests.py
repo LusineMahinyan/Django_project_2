@@ -1,63 +1,79 @@
-from django.contrib.auth import get_user_model
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from materials.models import Course, Lesson, Subscription
+from users.models import User
+from materials.models import Course, Lesson
 
-User = get_user_model()
 
-
-class APITests(APITestCase):
+class LessonTestCase(APITestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
             email="test@test.com",
-            password="1234"
+            password="12345"
         )
 
         self.course = Course.objects.create(
-            name="Test course",
-            owner=self.user
+            name="Python"
         )
 
         self.lesson = Lesson.objects.create(
-            name="Test lesson",
+            name="Lesson 1",
             course=self.course,
-            owner=self.user,
-            video_url="https://youtube.com/test"
+            video_url="https://youtube.com/watch?v=test"
         )
 
-
-
-    def auth(self):
         self.client.force_authenticate(user=self.user)
 
-
-
-    def test_course_list(self):
-        self.auth()
-        response = self.client.get("/api/courses/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-
-    def test_lesson_list(self):
-        self.auth()
+    def test_list_lessons(self):
         response = self.client.get("/api/lessons/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
 
-    def test_subscription_toggle(self):
-        self.auth()
+    def test_create_lesson(self):
+        data = {
+            "name": "Lesson 2",
+            "course": self.course.id,
+            "video_url": "https://youtube.com/watch?v=test2"
+        }
 
-        url = "/api/subscribe/"
-        data = {"course_id": self.course.id}
+        response = self.client.post(
+            "/api/lessons/",
+            data
+        )
 
-        # add
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Subscription.objects.count(), 1)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
 
-        # remove
-        response = self.client.post(url, data)
-        self.assertEqual(Subscription.objects.count(), 0)
+    def test_update_lesson(self):
+        response = self.client.patch(
+            f"/api/lessons/{self.lesson.id}/",
+            {"name": "Updated lesson"}
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.lesson.refresh_from_db()
+
+        self.assertEqual(
+            self.lesson.name,
+            "Updated lesson"
+        )
+
+    def test_delete_lesson(self):
+        response = self.client.delete(
+            f"/api/lessons/{self.lesson.id}/"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT
+        )

@@ -29,19 +29,16 @@ router.register(r"lessons", LessonViewSet)
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # JWT
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    # Регистрация
     path("api/register/", RegisterView.as_view(), name="register"),
 
-    # API
     path("api/", include(router.urls)),
-    
+    path("api/", include("materials.urls")),  # ДОБАВИТЬ ЭТУ СТРОКУ
+
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"))
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
 ]
 
 if settings.DEBUG:
