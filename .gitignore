@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+.idea/
+db.sqlite3
+venv/
+.env.example
+media/
