@@ -16,13 +16,11 @@ class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
 
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = [
-        "paid_course",
-        "paid_lesson",
-        "payment_method",
-    ]
-    ordering_fields = ["payment_date"]
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Payment.objects.all()
+
+        return Payment.objects.filter(user=self.request.user)
