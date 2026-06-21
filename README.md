@@ -25,5 +25,21 @@ docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 
 Документация:
-
 http://localhost:8000/api/docs/
+
+
+Схема:
+http://localhost:8000/api/schema/
+
+## CI/CD
+
+При каждом push и pull request автоматически запускаются:
+
+* миграции;
+* тесты;
+* проверка flake8.
+
+После успешного прохождения pipeline предусмотрен этап деплоя на удалённый сервер.
+
+Для подключения к серверу подготовлены SSH-ключи и конфигурация GitHub Actions.
+
