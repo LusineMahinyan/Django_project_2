@@ -1,8 +1,20 @@
-.env
+# Virtual environment
+.venv/
+venv/
+
+# IDE
+.idea/
+
+# Python
 __pycache__/
 *.pyc
-.idea/
+
+# Environment variables
+.env
+
+# Database
 db.sqlite3
-venv/
-.env.example
+
+# Media and static
 media/
+staticfiles/
